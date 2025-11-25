@@ -53,8 +53,9 @@ def solve_quiz_task(task_text):
     
     For the "python_code":
     - It must use 'requests', 'pandas', 'BeautifulSoup' etc.
-    - It must PRINT or store the final answer in a variable named 'result'.
-    - If a file needs downloading, download it using python requests.
+    - It must PRINT the final answer (or store it in 'result').
+    - IMPORTANT: When reading CSVs, always use 'pd.read_csv(file, on_bad_lines="skip")' or check the separator/engine to avoid tokenizing errors.
+    - If the file is not a standard CSV, try reading it as text first or using `sep` parameters.
     """
     
     response = client.chat.completions.create(
