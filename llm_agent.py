@@ -4,6 +4,8 @@ import json
 import requests
 import subprocess
 import sys
+import pandas as pd  # <--- ADDED THIS
+import numpy as np   # <--- ADDED THIS
 from openai import OpenAI
 from utils import AIPROXY_TOKEN, OPENAI_API_BASE
 
@@ -14,18 +16,26 @@ client = OpenAI(
 
 def execute_python_code(code_str):
     try:
-        local_scope = {}
-        exec(code_str, globals(), local_scope)
-        return local_scope.get('result', "No result variable found")
+        # We define a specific dictionary of tools available to the code
+        # This ensures 'pd' and 'np' are always recognized
+        execution_scope = {
+            "pd": pd,
+            "np": np,
+            "requests": requests,
+            "json": json,
+            "result": None # Initialize result variable
+        }
+        
+        # Execute the code using this scope
+        exec(code_str, execution_scope)
+        
+        return execution_scope.get('result', "No result variable found")
     except Exception as e:
         return f"Execution Error: {str(e)}"
 
 def solve_quiz_task(task_text, current_url):
-    """
-    Now accepts 'current_url' to help resolve relative links.
-    """
     
-    # Improved System Prompt with URL handling instructions
+    # Updated prompt to be even more explicit about imports
     system_prompt = f"""
     You are an intelligent agent. You have been given a raw text dump of a webpage.
     The page contains:
@@ -45,13 +55,10 @@ def solve_quiz_task(task_text, current_url):
     }}
     
     CRITICAL RULES:
-    1. **Relative URLs**: If the submission URL or a data file URL starts with '/', you MUST prepend the base domain from the CURRENT PAGE URL provided above.
-       - Example: if current_url is "https://site.com/page" and found url is "/submit", make it "https://site.com/submit".
-    2. **Python Code**: 
-       - Must use 'requests', 'pandas', etc.
-       - Store the final answer in a variable named 'result'.
-       - When reading CSVs, use 'pd.read_csv(file, on_bad_lines="skip")' to avoid tokenizing errors.
-       - Handle errors gracefully.
+    1. **Relative URLs**: If the submission URL starts with '/', PREPEND the base domain from the CURRENT PAGE URL ({current_url}).
+    2. **Imports**: ALWAYS include 'import pandas as pd' and 'import numpy as np' in your python_code, just to be safe.
+    3. **CSV Parsing**: Use 'pd.read_csv(..., on_bad_lines="skip")' to avoid tokenizing errors.
+    4. **Result**: Store the final answer in a variable named 'result'.
     """
     
     response = client.chat.completions.create(
@@ -63,18 +70,22 @@ def solve_quiz_task(task_text, current_url):
         response_format={"type": "json_object"}
     )
     
-    llm_output = json.loads(response.choices[0].message.content)
-    
-    code = llm_output['python_code']
-    submit_url = llm_output['submission_url']
-    
-    # DOUBLE SAFETY: If the LLM still returns a relative URL for submission, fix it here manually
-    if submit_url.startswith("/"):
-        from urllib.parse import urljoin
-        submit_url = urljoin(current_url, submit_url)
-    
-    print(f"Executing code for: {llm_output['explanation']}")
-    
-    answer = execute_python_code(code)
-    
-    return submit_url, answer
+    try:
+        llm_output = json.loads(response.choices[0].message.content)
+        code = llm_output.get('python_code', '')
+        submit_url = llm_output.get('submission_url', '')
+        explanation = llm_output.get('explanation', 'No explanation')
+        
+        # Safety fix for relative URLs
+        if submit_url.startswith("/"):
+            from urllib.parse import urljoin
+            submit_url = urljoin(current_url, submit_url)
+        
+        print(f"Executing code for: {explanation}")
+        answer = execute_python_code(code)
+        
+        return submit_url, answer
+        
+    except Exception as e:
+        print(f"LLM Parsing Error: {e}")
+        return current_url, None
