@@ -1,5 +1,5 @@
-# UPDATE THIS LINE TO v1.56.0-jammy
-FROM mcr.microsoft.com/playwright/python:v1.56.0-jammy
+# Use stable version 1.48.0
+FROM mcr.microsoft.com/playwright/python:v1.48.0-jammy
 
 WORKDIR /app
 
