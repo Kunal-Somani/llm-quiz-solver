@@ -55,10 +55,11 @@ def solve_quiz_task(task_text, current_url):
     }}
     
     CRITICAL RULES:
-    1. **Relative URLs**: If the submission URL starts with '/', PREPEND the base domain from the CURRENT PAGE URL ({current_url}).
-    2. **Imports**: ALWAYS include 'import pandas as pd' and 'import numpy as np' in your python_code, just to be safe.
-    3. **CSV Parsing**: Use 'pd.read_csv(..., on_bad_lines="skip")' to avoid tokenizing errors.
-    4. **Result**: Store the final answer in a variable named 'result'.
+    1. **File Downloading**: The data file is NOT on the server. You MUST write code to DOWNLOAD it first using `requests.get()` and save it to a file (e.g., 'data.csv').
+    2. **CSV Parsing**: After downloading, read it using 'pd.read_csv("data.csv")'.
+    3. **Relative URLs**: If a URL starts with '/', PREPEND the base domain ({current_url}).
+    4. **Imports**: ALWAYS include 'import pandas as pd', 'import requests', 'import numpy as np'.
+    5. **Result**: Store the final answer in a variable named 'result'.
     """
     
     response = client.chat.completions.create(
