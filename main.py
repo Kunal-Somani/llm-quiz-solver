@@ -28,7 +28,7 @@ async def process_quiz_flow(start_url: str):
         task_text = await get_task_from_url(current_url)
         
         # 2. Solve Task (LLM + Code Exec)
-        submit_url, answer = solve_quiz_task(task_text)
+        submit_url, answer = solve_quiz_task(task_text, current_url)
         
         # 3. Construct Payload
         payload = {
