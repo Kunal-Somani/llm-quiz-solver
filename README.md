@@ -66,4 +66,4 @@ docker compose up
 
 ## License
 
-MIT
+MIT License
