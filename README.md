@@ -2,6 +2,8 @@
 
 Helix is an autonomous agent system designed for recursive web task solving. It processes URLs, extracts content, and delegates decision-making to a language model to answer questions or fulfill objectives. The system runs in a restricted Python sandbox to execute dynamically generated code safely.
 
+---
+
 ## Architecture
 
 ```mermaid
@@ -14,6 +16,8 @@ graph TD
     C --> G[httpx: Web scraper]
 ```
 
+---
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -23,6 +27,8 @@ graph TD
 | Database | Turso |
 | Inference | Hugging Face |
 | Sandbox | RestrictedPython |
+
+---
 
 ## Local Development
 
@@ -34,10 +40,14 @@ cp .env.example .env
 docker compose up
 ```
 
+---
+
 ## Live Links
 
 - Frontend: https://helix-app.vercel.app
 - API Docs: https://helix-api.up.railway.app/api/docs
+
+---
 
 ## API Reference
 
@@ -51,6 +61,8 @@ docker compose up
 | GET | `/api/quiz/runs/{id}/logs` | None | Stream execution logs |
 | GET | `/api/metrics/performance` | None | System performance metrics |
 
+---
+
 ## Environment Variables
 
 | Variable | Description |
@@ -63,6 +75,8 @@ docker compose up
 | `MY_SECRET` | Auth secret key |
 | `LOG_LEVEL` | Application log level |
 | `ENVIRONMENT` | Target environment |
+
+---
 
 ## License
 
